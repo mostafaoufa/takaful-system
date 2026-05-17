@@ -1,0 +1,322 @@
+<!DOCTYPE html><!DOCTYPE<head>
+<meta charset="UTF-8">
+<title>TAKAFUL ERP SYSTEM</title>
+
+<!-- ✅ Bootstrap -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- ✅ Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- ✅ jsPDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+body {background:#f4f6f9;}
+.hidden {display:none;}
+.card {border-radius:12px;}
+</style>
+</head>
+
+<body class="p-4">
+
+<!-- ✅ LOGIN -->
+<div id="loginDiv" class="card p-4" style="max-width:350px;margin:auto">
+<h4 class="text-center mb-3">Login</h4>
+
+<input id="username" class="form-control mb-2" placeholder="Username">
+<input id="password" type="password" class="form-control mb-3" placeholder="Password">
+
+<button onclick="login()" class="btn btn-primary w-100">Login</button>
+</div>
+
+
+<!-- ✅ APP -->
+<div id="app" class="hidden">
+
+<h3>📊 Dashboard</h3>
+
+<!-- ✅ Key Metrics -->
+<div class="row mb-3">
+
+<div class="col">
+<div class="card p-3">
+Total Claims: <b id="total">0</b>
+</div>
+</div>
+
+<div class="col">
+<div class="card p-3">
+High Risk: <b id="high">0</b>
+</div>
+</div>
+
+<div class="col">
+<div class="card p-3">
+Approved: <b id="approved">0</b>
+</div>
+</div>
+
+</div>
+
+<!-- ✅ Chart -->
+<canvas id="chart" height="100"></canvas>
+
+<hr>
+
+<h5>Create Claim</h5>
+<input id="cno" class="form-control mb-1" placeholder="Claim No">
+<input id="cname" class="form-control mb-1" placeholder="Customer">
+<input id="cplate" class="form-control mb-1" placeholder="Plate">
+<input id="camount" class="form-control mb-2" placeholder="Amount">
+
+<button onclick="createClaim()" class="btn btn-success mb-3">Create</button>
+
+<hr>
+
+<h5>Claims</h5>
+
+<table class="table table-bordered">
+<thead class="table-dark">
+<tr>
+<th>Claim</th>
+<th>Customer</th>
+<th>Amount</th>
+<th>Fraud</th>
+<th>Actions</th>
+</tr>
+</thead>
+
+<tbody id="claims"></tbody>
+</table>
+
+
+<!-- ✅ WORKFLOW -->
+<div id="workflowBox" class="card p-3 hidden">
+<h5>Workflow</h5>
+
+<table class="table">
+<tbody id="workflow"></tbody>
+</table>
+</div>
+
+</div>
+
+<script>
+
+const API = "http://localhost:3000";
+``
+let role="",selectedClaim;
+
+// ✅ LOGIN
+async function login(){
+
+let res=await fetch(API+"/login",{
+method:"POST",
+headers:{'Content-Type':'application/json'},
+body: JSON.stringify({
+username:username.value,
+password:password.value
+})
+});
+
+let data=await res.json();
+
+if(data.ok){
+
+role=data.user.role;
+
+loginDiv.style.display="none";
+app.classList.remove("hidden");
+
+loadClaims();
+
+}else{
+alert("Login Failed ❌");
+}
+}
+
+
+// ✅ LOAD CLAIMS
+async function loadClaims(){
+
+let res=await fetch(API+"/claims");
+let data=await res.json();
+
+total.innerText=data.length;
+
+// KPI
+high.innerText=data.filter(x=>x.fraud_level?.includes("HIGH")).length;
+approved.innerText=data.filter(x=>x.status=="Approved").length;
+
+// ✅ Table
+claims.innerHTML="";
+
+data.forEach(c=>{
+claims.innerHTML+=`
+<tr>
+<td>${c.claim_no}</td>
+<td>${c.customer_name}</td>
+<td>${c.amount}</td>
+<td>${c.fraud_level}</td>
+<td>
+
+<button onclick="viewWorkflow(${c.id})" class="btn btn-primary btn-sm">View</button>
+
+<button onclick="downloadPDF(${c.id})" class="btn btn-dark btn-sm">PDF</button>
+
+</td>
+</tr>
+`;
+});
+
+// ✅ Chart
+drawChart(data);
+}
+
+
+// ✅ CREATE CLAIM
+async function createClaim(){
+
+await fetch(API+"/claims",{
+method:"POST",
+headers:{'Content-Type':'application/json'},
+body: JSON.stringify({
+claim_no:cno.value,
+customer_name:cname.value,
+plate:cplate.value,
+amount:camount.value,
+status:"Pending"
+})
+});
+
+alert("✅ Created");
+
+loadClaims();
+}
+
+
+// ✅ VIEW WORKFLOW
+async function viewWorkflow(id){
+
+selectedClaim=id;
+
+let res=await fetch(API+"/approvals/"+id);
+let data=await res.json();
+
+workflowBox.classList.remove("hidden");
+
+let html="";
+
+data.forEach(stage=>{
+
+let allow=
+(stage.stage_id==1 && role=="officer") ||
+(stage.stage_id==2 && role=="supervisor") ||
+(stage.stage_id==3 && role=="finance");
+
+html+=`
+<tr>
+<td>Stage ${stage.stage_id}</td>
+<td>${stage.status}</td>
+<td>
+
+${allow ? `
+<button onclick="approve(${stage.id},'Approved')" class="btn btn-success btn-sm">Approve</button>
+
+<button onclick="approve(${stage.id},'Rejected')" class="btn btn-danger btn-sm">Reject</button>
+
+<button onclick="approve(${stage.id},'Missing')" class="btn btn-warning btn-sm">Missing</button>
+`
+:
+"❌ No Access"}
+
+</td>
+</tr>
+`;
+});
+
+workflow.innerHTML=html;
+}
+
+
+// ✅ APPROVE + WHATSAPP
+async function approve(id,status){
+
+let res=await fetch(API+"/approve",{
+method:"POST",
+headers:{'Content-Type':'application/json'},
+body: JSON.stringify({
+id:id,
+status:status,
+user:role
+})
+});
+
+let data=await res.json();
+
+if(!data.ok){
+alert(data.message);
+return;
+}
+
+// ✅ WhatsApp
+window.open(
+"https://wa.me/971500000000?text="+encodeURIComponent(status),
+"_blank"
+);
+
+alert("✅ Updated");
+
+viewWorkflow(selectedClaim);
+}
+
+
+// ✅ PDF
+async function downloadPDF(id){
+
+let res=await fetch(API+"/claims");
+let data=await res.json();
+
+let c=data.find(x=>x.id==id);
+
+const {jsPDF}=window.jspdf;
+
+let doc=new jsPDF();
+
+doc.text("TAKAFUL CLAIM REPORT",20,20);
+
+doc.text("Claim: "+c.claim_no,20,40);
+doc.text("Customer: "+c.customer_name,20,50);
+doc.text("Amount: "+c.amount,20,60);
+doc.text("Fraud: "+c.fraud_level,20,70);
+
+doc.save("claim_"+c.claim_no+".pdf");
+}
+
+
+// ✅ CHART
+function drawChart(data){
+
+let approvedCount=data.filter(x=>x.status=="Approved").length;
+let pendingCount=data.filter(x=>x.status=="Pending").length;
+let rejectedCount=data.filter(x=>x.status=="Rejected").length;
+
+new Chart(document.getElementById("chart"),{
+type:"pie",
+data:{
+labels:["Approved","Pending","Rejected"],
+datasets:[{
+data:[approvedCount,pendingCount,rejectedCount],
+backgroundColor:["green","orange","red"]
+}]
+}
+});
+}
+
+</script>
+
+</body>
+</html>
+``
+<html>
