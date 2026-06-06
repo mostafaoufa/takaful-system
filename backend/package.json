@@ -1,20 +1,14 @@
 {
-  "name": "backend",
+  "name": "takaful-system",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "main": "backend/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node backend/server.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
   "dependencies": {
-    "cors": "^2.8.6",
-    "express": "^5.2.1",
-    "multer": "^2.1.1",
-    "mysql2": "^3.22.5",
-    "nodemailer": "^8.0.10"
+    "express": "^4.18.2",
+    "mysql2": "^3.9.0",
+    "cors": "^2.8.5",
+    "nodemailer": "^6.9.0"
   }
 }
