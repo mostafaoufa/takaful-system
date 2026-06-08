@@ -11,12 +11,17 @@ app.use(cors());
    ✅ DATABASE CONNECTION
 ========================= */
 const db = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: '',
-    database: 'takaful_db'
+    host: "caboose.proxy.rlwy.net",
+    user: "root",
+    password: "XXXXXXXX",   // من Railway
+    database: "railway",
+    port: 12345             // من Railway
 });
 
+});
+});
+});
+``
 db.connect(err => {
     if (err) {
         console.log("❌ DB Error:", err);
