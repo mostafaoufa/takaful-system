@@ -6,20 +6,38 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
+/* ✅ DATABASE (Railway Public) */
 const db = mysql.createPool({
     host: "caboose.proxy.rlwy.net",
     user: "root",
-    password: "YOUR_PASSWORD",
+    password: "1234",       // 
     database: "railway",
-    port: 10000,
+    port: 31936,            // 
+
+    ssl: {
+        rejectUnauthorized: false
+    },
+
     waitForConnections: true,
     connectionLimit: 10
 });
 
+/* ✅ TEST CONNECTION */
+db.getConnection((err, con) => {
+    if (err) {
+        console.log("❌ DB Error:", err);
+    } else {
+        console.log("✅ DB Connected");
+        con.release();
+    }
+});
+
+/* ✅ HOME */
 app.get('/', (req, res) => {
     res.send("ERP System Running ✅");
 });
 
+/* ✅ LOGIN */
 app.post('/login', (req, res) => {
 
     const { username, password } = req.body;
@@ -30,7 +48,7 @@ app.post('/login', (req, res) => {
         (err, result) => {
 
             if (err) {
-                console.log(err);
+                console.log("❌ Query Error:", err);
                 return res.json({ ok:false });
             }
 
@@ -39,13 +57,13 @@ app.post('/login', (req, res) => {
             } else {
                 res.json({ ok:false });
             }
-
         }
     );
 });
 
-const PORT = process.env.PORT || 3000;
+/* ✅ SERVER */
+const PORT = process.env.PORT || 10000;
 
 app.listen(PORT, () => {
-    console.log("Server running ✅");
+    console.log("🚀 Server running on port " + PORT);
 });
