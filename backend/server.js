@@ -6,13 +6,12 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-/* ✅ DATABASE (Railway Public) */
 const db = mysql.createPool({
     host: "caboose.proxy.rlwy.net",
     user: "root",
-    password: "1234",       // 
+    password: "GfsvKVIMUAfnDqGeisGVLcggWwdSwKMy",
     database: "railway",
-    port: 31936,            // 
+    port: 31936,
 
     ssl: {
         rejectUnauthorized: false
@@ -22,7 +21,6 @@ const db = mysql.createPool({
     connectionLimit: 10
 });
 
-/* ✅ TEST CONNECTION */
 db.getConnection((err, con) => {
     if (err) {
         console.log("❌ DB Error:", err);
@@ -32,14 +30,11 @@ db.getConnection((err, con) => {
     }
 });
 
-/* ✅ HOME */
 app.get('/', (req, res) => {
     res.send("ERP System Running ✅");
 });
 
-/* ✅ LOGIN */
 app.post('/login', (req, res) => {
-
     const { username, password } = req.body;
 
     db.query(
@@ -48,7 +43,7 @@ app.post('/login', (req, res) => {
         (err, result) => {
 
             if (err) {
-                console.log("❌ Query Error:", err);
+                console.log(err);
                 return res.json({ ok:false });
             }
 
@@ -61,7 +56,6 @@ app.post('/login', (req, res) => {
     );
 });
 
-/* ✅ SERVER */
 const PORT = process.env.PORT || 10000;
 
 app.listen(PORT, () => {
