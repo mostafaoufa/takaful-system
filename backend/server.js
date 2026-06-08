@@ -31,27 +31,17 @@ app.get('/', (req, res) => {
 /* ✅ LOGIN */
 app.post('/login', (req, res) => {
 
-    const { username, password } = req.body;
-
-    db.query(
-        "SELECT * FROM users WHERE username=? AND password=?",
-        [username, password],
-        (err, result) => {
-
-            if (err) {
-                console.log(err);
-                return res.json({ ok: false });
-            }
-
-            if (result.length > 0) {
-                res.json({ ok: true, user: result[0] });
-            } else {
-                res.json({ ok: false });
-            }
-
-        }
-    );
+    const db = mysql.createPool({
+    host: "caboose.proxy.rlwy.net",
+    user: "root",
+    password: "YOUR_PASSWORD",
+    database: "railway",
+    port: YOUR_PORT,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
 });
+
 
 /* ✅ SERVER */
 const PORT = process.env.PORT || 3000;
