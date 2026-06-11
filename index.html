@@ -109,24 +109,25 @@ const API = "https://takaful-backend-rqmn.onrender.com";
 let role="",selectedClaim;
 
 // ✅ LOGIN
-let res = await fetch(API+"/login", {
-    method:"POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({
-        username: username.value,
-        password: password.value
-    })
-});
+async function login() {
 
-let data = await res.json();
+    let res = await fetch(API + "/login", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            username: username.value,
+            password: password.value
+        })
+    });
 
-if(data.ok){
-    alert("Login Success ✅");
-}else{
-    alert("Login Failed ❌");
+    let data = await res.json();
+
+    if (data.ok) {
+        alert("Login Success ✅");
+    } else {
+        alert("Login Failed ❌");
+    }
 }
-``
-
 // ✅ LOAD CLAIMS
 async function loadClaims(){
 
