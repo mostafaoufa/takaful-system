@@ -17,7 +17,34 @@ body {background:#f4f6f9;}
 .card {border-radius:12px;}
 </style>
 </head>
+<script>
 
+const API = "https://takaful-backend-rqmn.onrender.com";
+
+async function login(){
+
+    let username = document.querySelector("input[placeholder='Username']").value;
+    let password = document.querySelector("input[placeholder='Password']").value;
+
+    let res = await fetch(API + "/login", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({
+            username: username,
+            password: password
+        })
+    });
+
+    let data = await res.json();
+
+    if(data.ok){
+        alert("✅ Login Success");
+    }else{
+        alert("❌ Login Failed");
+    }
+}
+
+</script>
 <body class="p-4">
 
 <!-- ✅ LOGIN -->
