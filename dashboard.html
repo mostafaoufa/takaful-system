@@ -1,81 +1,65 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Dashboard</title>
+<title>Dashboard</title>
 
-    <style>
-        body{
-            margin:0;
-            font-family: Arial;
-            background:#f4f4f4;
-        }
+<style>
+body{
+    margin:0;
+    font-family:Arial;
+    background:#f4f4f4;
+}
 
-        .sidebar{
-            width:220px;
-            height:100vh;
-            background:#007bff;
-            color:white;
-            position:fixed;
-            padding:20px;
-        }
+.sidebar{
+    width:220px;
+    height:100vh;
+    background:#007bff;
+    position:fixed;
+    color:white;
+    padding:20px;
+}
 
-        .sidebar h3{
-            text-align:center;
-        }
+.sidebar h3{
+    text-align:center;
+}
 
-        .sidebar a{
-            display:block;
-            padding:10px;
-            margin:5px 0;
-            background:rgba(255,255,255,0.1);
-            color:white;
-            text-decoration:none;
-            cursor:pointer;
-        }
+.sidebar a{
+    display:block;
+    padding:10px;
+    margin:5px 0;
+    background:rgba(255,255,255,0.1);
+    cursor:pointer;
+    color:white;
+}
 
-        .sidebar a:hover{
-            background:white;
-            color:#007bff;
-        }
+.sidebar a:hover{
+    background:white;
+    color:#007bff;
+}
 
-        .content{
-            margin-left:240px;
-            padding:20px;
-        }
+.content{
+    margin-left:250px;
+    padding:20px;
+}
 
-        .card{
-            background:white;
-            padding:20px;
-            margin:10px;
-            display:inline-block;
-            width:200px;
-            border-radius:10px;
-            text-align:center;
-            box-shadow:0 2px 5px rgba(0,0,0,0.2);
-        }
+.claim{
+    background:#fff;
+    padding:10px;
+    margin:10px 0;
+    border-left:5px solid #007bff;
+}
 
-        input{
-            padding:10px;
-            margin:5px;
-            width:250px;
-        }
+button{
+    padding:8px;
+    margin:5px;
+    cursor:pointer;
+}
 
-        button{
-            padding:10px;
-            margin:5px;
-            background:#007bff;
-            color:white;
-            border:none;
-            cursor:pointer;
-        }
-
-        .claim{
-            background:white;
-            padding:10px;
-            margin:10px 0;
-            border-left:5px solid #007bff;
-        }
-    </style>
+input{
+    padding:8px;
+    margin:5px;
+}
+</style>
 
 </head>
 
@@ -84,56 +68,73 @@
 <div class="sidebar">
     <h3>💼 System</h3>
 
-    <a onclick="showDashboard()">📊 Dashboard</a>
-    <a onclick="showClaims()">📄 Claims</a>
+    <a onclick="showDashboard()">Dashboard</a>
+    <a onclick="showClaims()">Claims</a>
 </div>
 
-<div class="content" id="main">
-    <h2>Dashboard</h2>
-    <div class="card">Claims<br><b>--</b></div>
-    <div class="card">Users<br><b>--</b></div>
-</div>
+<div class="content" id="main"></div>
 
 <script>
 
 const API = "https://takaful-backend-rqmn.onrender.com";
 
+// ✅ Session
+let user = JSON.parse(localStorage.getItem("user"));
+
+if(!user){
+    window.location.href = "index.html";
+}
+
 // ✅ Dashboard
 function showDashboard(){
+
     document.getElementById("main").innerHTML = `
-        <h2>Dashboard</h2>
-        <div class="card">Claims<br><b>--</b></div>
-        <div class="card">Users<br><b>--</b></div>
+        <h2>Welcome ${user.username}</h2>
+        <p>Role: ${user.role}</p>
     `;
 }
 
-// ✅ Load Claims
+// ✅ Claims
 function showClaims(){
 
-    fetch(API + "/claims")
+    fetch(API + "/claims?user=" + (user.role === "client" ? user.username : ""))
     .then(res => res.json())
     .then(data => {
 
         let html = `
         <h2>Claims System</h2>
 
-        <input id="title" placeholder="Claim Title"><br>
+        <input id="title" placeholder="Title"><br>
         <input id="desc" placeholder="Description"><br>
+
         <button onclick="addClaim()">Add Claim</button>
         <hr>
         `;
 
         data.forEach(c => {
+
             html += `
             <div class="claim">
                 <b>${c.title}</b><br>
                 ${c.description}<br>
-                <b>Status: ${c.status || 'Pending'}</b><br>
-
-                <button onclick="updateStatus(${c.id}, 'Approved')">✅ Approve</button>
-                <button onclick="updateStatus(${c.id}, 'Rejected')">❌ Reject</button>
-            </div>
+                Status: <b>${c.status}</b><br>
             `;
+
+            // ✅ ROLE PERMISSIONS
+
+            if(user.role === "admin" || user.role === "supervisor"){
+                html += `<button onclick="updateStatus(${c.id}, 'Approved')">✅ Approve</button>`;
+            }
+
+            if(user.role === "admin" || user.role === "officer"){
+                html += `<button onclick="updateStatus(${c.id}, 'Rejected')">❌ Reject</button>`;
+            }
+
+            if(user.role === "finance"){
+                html += `<button onclick="updateStatus(${c.id}, 'Paid')">💰 Pay</button>`;
+            }
+
+            html += `</div>`;
         });
 
         document.getElementById("main").innerHTML = html;
@@ -148,26 +149,32 @@ function addClaim(){
     let desc = document.getElementById("desc").value;
 
     fetch(API + "/addClaim", {
-        method:"POST",
-        headers:{ "Content-Type":"application/json" },
-        body: JSON.stringify({ title, desc })
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            title,
+            desc,
+            username: user.username
+        })
     })
-    .then(res => res.json())
     .then(() => showClaims());
 
 }
 
-// ✅ Update Status (FIXED ✅)
+// ✅ Update Status
 function updateStatus(id, status){
 
     fetch(API + "/updateStatus", {
-        method:"POST",
-        headers:{ "Content-Type":"application/json" },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id, status })
     })
     .then(() => showClaims());
 
 }
+
+// ✅ Default load
+showDashboard();
 
 </script>
 
