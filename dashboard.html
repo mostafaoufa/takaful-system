@@ -2,11 +2,120 @@
 <html>
 <head>
     <title>Dashboard</title>
+
+    <style>
+        body{
+            margin:0;
+            font-family: Arial;
+        }
+
+        .sidebar{
+            width:200px;
+            height:100vh;
+            background:#007bff;
+            color:white;
+            position:fixed;
+            padding:20px;
+        }
+
+        .sidebar a{
+            display:block;
+            color:white;
+            margin:10px 0;
+            text-decoration:none;
+            cursor:pointer;
+        }
+
+        .content{
+            margin-left:220px;
+            padding:20px;
+        }
+
+        .card{
+            background:#eee;
+            padding:20px;
+            margin:10px;
+            display:inline-block;
+            width:200px;
+        }
+    </style>
 </head>
 
-<body style="text-align:center; margin-top:100px">
+<body>
 
-<h2>✅ Dashboard شغال</h2>
+<div class="sidebar">
+    <h3>📊 System</h3>
+
+    <a onclick="goDashboard()">Dashboard</a>
+    <a onclick="goClaims()">Claims</a>
+</div>
+
+<div class="content" id="main">
+
+    <h2>Dashboard</h2>
+
+    <div class="card">Claims: 10</div>
+    <div class="card">Users: 3</div>
+
+</div>
+
+<script>
+
+function goDashboard(){
+    document.getElementById("main").innerHTML = `
+        <h2>Dashboard</h2>
+        <div class='card'>Claims: 10</div>
+        <div class='card'>Users: 3</div>
+    `;
+}
+
+function goClaims(){
+    loadClaims();
+}
+
+function loadClaims(){
+
+    fetch("https://takaful-backend-rqmn.onrender.com/claims")
+    .then(res=>res.json())
+    .then(data=>{
+
+        let html = "<h2>Claims</h2>";
+
+        html += `
+        <input id="title" placeholder="Title"><br>
+        <input id="desc" placeholder="Description"><br>
+        <button onclick="addClaim()">Add Claim</button>
+        `;
+
+        data.forEach(c=>{
+            html += `<div class='card'>
+                        <b>${c.title}</b><br>
+                        ${c.description}
+                     </div>`;
+        });
+
+        document.getElementById("main").innerHTML = html;
+    });
+
+}
+
+function addClaim(){
+
+    let title = document.getElementById("title").value;
+    let desc = document.getElementById("desc").value;
+
+    fetch("https://takaful-backend-rqmn.onrender.com/addClaim", {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({title, desc})
+    })
+    .then(res=>res.json())
+    .then(()=>{
+        loadClaims();
+    });
+}
+
+</script>
 
 </body>
 </html>

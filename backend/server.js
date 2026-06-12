@@ -63,19 +63,24 @@ app.listen(PORT, () => {
 });
 // ✅ Add Claim
 app.post("/addClaim", (req,res)=>{
-
-    const { title, desc } = req.body;
+    const {title, desc} = req.body;
 
     db.query(
-        "INSERT INTO claims (title, description) VALUES (?,?)",
+        "INSERT INTO claims (title,description) VALUES (?,?)",
         [title, desc],
-        (err,result)=>{
+        (err)=>{
             if(err) return res.json({ok:false});
             res.json({ok:true});
         }
     );
-
 });
+
+app.get("/claims", (req,res)=>{
+    db.query("SELECT * FROM claims", (err,result)=>{
+        res.json(result);
+    });
+});
+``
 
 // ✅ Get Claims
 app.get("/claims", (req,res)=>{
