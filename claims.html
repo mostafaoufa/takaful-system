@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Claims</title>
+
+    <style>
+        body{
+            font-family: Arial;
+            background:#eee;
+        }
+
+        .top{
+            background:#007bff;
+            color:white;
+            padding:15px;
+        }
+
+        .container{
+            padding:20px;
+        }
+
+        input, textarea{
+            display:block;
+            margin:10px;
+            padding:10px;
+            width:300px;
+        }
+
+        button{
+            padding:10px;
+        }
+
+        .card{
+            background:white;
+            padding:10px;
+            margin:10px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="top">
+    📄 Claims System
+</div>
+
+<div class="container">
+
+    <h3>Add Claim</h3>
+
+    <input id="title" placeholder="Claim Title">
+    <textarea id="desc" placeholder="Description"></textarea>
+
+    <button onclick="addClaim()">Submit</button>
+
+    <h3>All Claims</h3>
+    <div id="claimsList"></div>
+
+</div>
+
+
+<script>
+
+const API = "https://takaful-backend-rqmn.onrender.com";
+
+// ✅ add claim
+function addClaim(){
+
+    let title = document.getElementById("title").value;
+    let desc = document.getElementById("desc").value;
+
+    fetch(API + "/addClaim", {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({title, desc})
+    })
+    .then(res=>res.json())
+    .then(data=>{
+        alert("✅ Claim Added");
+        loadClaims();
+    });
+}
+
+// ✅ load claims
+function loadClaims(){
+
+    fetch(API + "/claims")
+    .then(res=>res.json())
+    .then(data=>{
+
+        let html = "";
+
+        data.forEach(c=>{
+            html += `<div class="card">
+                       <b>${c.title}</b><br>
+                       ${c.description}
+                     </div>`;
+        });
+
+        document.getElementById("claimsList").innerHTML = html;
+    });
+}
+
+loadClaims();
+
+</script>
+
+</body>
+</html>

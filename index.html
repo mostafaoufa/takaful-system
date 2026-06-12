@@ -43,13 +43,13 @@ document.getElementById("form").addEventListener("submit", function(e){
 
         alert("RESULT: " + JSON.stringify(data));
 
-        if(data.ok){
-            alert("✅ Login Success");
-        }else{
-            alert("❌ Login Failed");
-        }
+       if(data.ok){
+    alert("✅ Login Success");
 
-    })
+    // ✅ فتح Dashboard
+    window.location.href = "dashboard.html";
+}
+
     .catch(err => {
         alert("❌ ERROR: " + err);
     });

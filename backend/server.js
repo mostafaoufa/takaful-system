@@ -61,3 +61,29 @@ const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
     console.log("🚀 Server running on port " + PORT);
 });
+// ✅ Add Claim
+app.post("/addClaim", (req,res)=>{
+
+    const { title, desc } = req.body;
+
+    db.query(
+        "INSERT INTO claims (title, description) VALUES (?,?)",
+        [title, desc],
+        (err,result)=>{
+            if(err) return res.json({ok:false});
+            res.json({ok:true});
+        }
+    );
+
+});
+
+// ✅ Get Claims
+app.get("/claims", (req,res)=>{
+
+    db.query("SELECT * FROM claims", (err,result)=>{
+        if(err) return res.json([]);
+        res.json(result);
+    });
+
+});
+``
