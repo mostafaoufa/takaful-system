@@ -43,12 +43,15 @@ document.getElementById("form").addEventListener("submit", function(e){
 
         alert("RESULT: " + JSON.stringify(data));
 
-       if(data.ok){
+    if(data.ok){
+
     alert("✅ Login Success");
 
-    // ✅ فتح Dashboard
+    // ✅ الانتقال للداشبورد
     window.location.href = "dashboard.html";
+
 }
+
 
     .catch(err => {
         alert("❌ ERROR: " + err);
