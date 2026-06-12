@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>TAKAFUL ERP SYSTEM</title>
+    <title>LOGIN</title>
 </head>
 
 <body style="text-align:center; margin-top:100px">
@@ -23,13 +23,13 @@ const API = "https://takaful-backend-rqmn.onrender.com";
 
 document.getElementById("form").addEventListener("submit", function(e){
 
-    e.preventDefault();  // ✅ يمنع reload
+    e.preventDefault(); // ✅ أهم سطر (يمنع GET)
 
     let username = document.getElementById("username").value;
     let password = document.getElementById("password").value;
 
     fetch(API + "/login", {
-        method: "POST",
+        method: "POST",   // ✅ مهم جدًا
         headers: {
             "Content-Type":"application/json"
         },
@@ -41,7 +41,7 @@ document.getElementById("form").addEventListener("submit", function(e){
     .then(res => res.json())
     .then(data => {
 
-        alert(JSON.stringify(data));
+        alert("RESULT: " + JSON.stringify(data));
 
         if(data.ok){
             alert("✅ Login Success");
