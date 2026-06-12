@@ -131,18 +131,19 @@ function showClaims(){
         `;
 
         data.forEach(c => {
-            html += `
-            <div class="claim">
-                <b>${c.title}</b><br>
-                ${c.description}
-            </div>
-            `;
-        });
 
-        document.getElementById("main").innerHTML = html;
-    });
+    html += `
+    <div class="claim">
+        <b>${c.title}</b><br>
+        ${c.description}<br>
+        <b>Status: ${c.status}</b><br>
 
-}
+        <button onclick="updateStatus(${c.id}, 'Approved')">✅ Approve</button>
+        <button onclick="updateStatus(${c.id}, 'Rejected')">❌ Reject</button>
+    </div>
+    `;
+
+});
 
 
 // ✅ ADD CLAIM
@@ -167,3 +168,13 @@ function addClaim(){
 
 </body>
 </html>
+function updateStatus(id, status){
+
+    fetch(API + "/updateStatus", {
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify({ id, status })
+    })
+    .then(()=>showClaims());
+
+}

@@ -91,3 +91,18 @@ app.get("/claims", (req,res)=>{
 
 });
 ``
+// ✅ Update claim status
+app.post("/updateStatus", (req,res)=>{
+
+    const {id, status} = req.body;
+
+    db.query(
+        "UPDATE claims SET status=? WHERE id=?",
+        [status, id],
+        (err)=>{
+            if(err) return res.json({ok:false});
+            res.json({ok:true});
+        }
+    );
+
+});
