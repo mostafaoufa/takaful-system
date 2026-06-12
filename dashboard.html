@@ -7,10 +7,11 @@
         body{
             margin:0;
             font-family: Arial;
+            background:#f4f4f4;
         }
 
         .sidebar{
-            width:200px;
+            width:220px;
             height:100vh;
             background:#007bff;
             color:white;
@@ -18,80 +19,124 @@
             padding:20px;
         }
 
+        .sidebar h3{
+            text-align:center;
+        }
+
         .sidebar a{
             display:block;
+            padding:10px;
+            margin:5px 0;
+            background:rgba(255,255,255,0.1);
             color:white;
-            margin:10px 0;
             text-decoration:none;
             cursor:pointer;
         }
 
+        .sidebar a:hover{
+            background:white;
+            color:#007bff;
+        }
+
         .content{
-            margin-left:220px;
+            margin-left:240px;
             padding:20px;
         }
 
         .card{
-            background:#eee;
+            background:white;
             padding:20px;
             margin:10px;
             display:inline-block;
             width:200px;
+            border-radius:10px;
+            text-align:center;
+            box-shadow:0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        input{
+            padding:10px;
+            margin:5px;
+            width:250px;
+        }
+
+        button{
+            padding:10px;
+            margin:5px;
+            background:#007bff;
+            color:white;
+            border:none;
+            cursor:pointer;
+        }
+
+        .claim{
+            background:white;
+            padding:10px;
+            margin:10px 0;
+            border-left:5px solid #007bff;
         }
     </style>
+
 </head>
 
 <body>
 
 <div class="sidebar">
-    <h3>📊 System</h3>
+    <h3>💼 System</h3>
 
-    <a onclick="goDashboard()">Dashboard</a>
-    <a onclick="goClaims()">Claims</a>
+    <a onclick="showDashboard()">📊 Dashboard</a>
+    <a onclick="showClaims()">📄 Claims</a>
 </div>
 
 <div class="content" id="main">
 
+    <!-- Dashboard Default -->
     <h2>Dashboard</h2>
 
-    <div class="card">Claims: 10</div>
-    <div class="card">Users: 3</div>
+    <div class="card">Claims<br><b>--</b></div>
+    <div class="card">Users<br><b>--</b></div>
 
 </div>
 
 <script>
 
-function goDashboard(){
+// ✅ API LINK
+const API = "https://takaful-backend-rqmn.onrender.com";
+
+
+// ✅ Dashboard
+function showDashboard(){
     document.getElementById("main").innerHTML = `
         <h2>Dashboard</h2>
-        <div class='card'>Claims: 10</div>
-        <div class='card'>Users: 3</div>
+        <div class="card">Claims<br><b>--</b></div>
+        <div class="card">Users<br><b>--</b></div>
     `;
 }
 
-function goClaims(){
-    loadClaims();
-}
 
-function loadClaims(){
+// ✅ SHOW CLAIMS
+function showClaims(){
 
-    fetch("https://takaful-backend-rqmn.onrender.com/claims")
-    .then(res=>res.json())
-    .then(data=>{
+    fetch(API + "/claims")
+    .then(res => res.json())
+    .then(data => {
 
-        let html = "<h2>Claims</h2>";
+        let html = `
+        <h2>Claims System</h2>
 
-        html += `
-        <input id="title" placeholder="Title"><br>
+        <input id="title" placeholder="Claim Title"><br>
         <input id="desc" placeholder="Description"><br>
         <button onclick="addClaim()">Add Claim</button>
+        <hr>
         `;
 
-        data.forEach(c=>{
-            html += `<div class='card'>
-                        <b>${c.title}</b><br>
-                        ${c.description}
-                     </div>`;
+        data.forEach(c => {
+            html += `
+            <div class="claim">
+                <b>${c.title}</b><br>
+                ${c.description}
+            </div>
+            `;
         });
 
         document.getElementById("main").innerHTML = html;
@@ -99,20 +144,23 @@ function loadClaims(){
 
 }
 
+
+// ✅ ADD CLAIM
 function addClaim(){
 
     let title = document.getElementById("title").value;
     let desc = document.getElementById("desc").value;
 
-    fetch("https://takaful-backend-rqmn.onrender.com/addClaim", {
+    fetch(API + "/addClaim", {
         method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({title, desc})
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify({ title, desc })
     })
-    .then(res=>res.json())
-    .then(()=>{
-        loadClaims();
+    .then(res => res.json())
+    .then(() => {
+        showClaims(); // refresh
     });
+
 }
 
 </script>

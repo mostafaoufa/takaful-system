@@ -81,7 +81,6 @@ app.get("/claims", (req,res)=>{
     });
 });
 ``
-
 // ✅ Get Claims
 app.get("/claims", (req,res)=>{
 
