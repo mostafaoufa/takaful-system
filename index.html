@@ -1,63 +1,47 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>LOGIN</title>
+    <title>Login</title>
 </head>
 
 <body style="text-align:center; margin-top:100px">
 
 <h2>Login</h2>
 
-<form id="form">
-
 <input id="username" placeholder="Username"><br><br>
 <input id="password" type="password" placeholder="Password"><br><br>
 
-<button type="submit">Login</button>
-
-</form>
+<button onclick="login()">Login</button>
 
 <script>
 
-const API = "https://takaful-backend-rqmn.onrender.com";
-
-document.getElementById("form").addEventListener("submit", function(e){
-
-    e.preventDefault(); // ✅ أهم سطر (يمنع GET)
+function login(){
 
     let username = document.getElementById("username").value;
     let password = document.getElementById("password").value;
 
-    fetch(API + "/login", {
-        method: "POST",   // ✅ مهم جدًا
+    fetch("https://takaful-backend-rqmn.onrender.com/login", {
+        method: "POST",
         headers: {
-            "Content-Type":"application/json"
+            "Content-Type": "application/json"
         },
-        body: JSON.stringify({
-            username: username,
-            password: password
-        })
+        body: JSON.stringify({username, password})
     })
     .then(res => res.json())
     .then(data => {
 
-        alert("RESULT: " + JSON.stringify(data));
+        if(data.ok){
 
-    if(data.ok){
+            // ✅ مفيش Alert — نخش على طول
+            window.location.href = "dashboard.html";
 
-    alert("✅ Login Success");
+        }else{
+            alert("❌ Login Failed");
+        }
 
-    // ✅ الانتقال للداشبورد
-    window.location.href = "dashboard.html";
-
-}
-
-
-    .catch(err => {
-        alert("❌ ERROR: " + err);
     });
 
-});
+}
 
 </script>
 
