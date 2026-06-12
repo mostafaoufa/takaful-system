@@ -89,20 +89,14 @@
 </div>
 
 <div class="content" id="main">
-
-    <!-- Dashboard Default -->
     <h2>Dashboard</h2>
-
     <div class="card">Claims<br><b>--</b></div>
     <div class="card">Users<br><b>--</b></div>
-
 </div>
 
 <script>
 
-// ✅ API LINK
 const API = "https://takaful-backend-rqmn.onrender.com";
-
 
 // ✅ Dashboard
 function showDashboard(){
@@ -113,8 +107,7 @@ function showDashboard(){
     `;
 }
 
-
-// ✅ SHOW CLAIMS
+// ✅ Load Claims
 function showClaims(){
 
     fetch(API + "/claims")
@@ -131,22 +124,24 @@ function showClaims(){
         `;
 
         data.forEach(c => {
+            html += `
+            <div class="claim">
+                <b>${c.title}</b><br>
+                ${c.description}<br>
+                <b>Status: ${c.status || 'Pending'}</b><br>
 
-    html += `
-    <div class="claim">
-        <b>${c.title}</b><br>
-        ${c.description}<br>
-        <b>Status: ${c.status}</b><br>
+                <button onclick="updateStatus(${c.id}, 'Approved')">✅ Approve</button>
+                <button onclick="updateStatus(${c.id}, 'Rejected')">❌ Reject</button>
+            </div>
+            `;
+        });
 
-        <button onclick="updateStatus(${c.id}, 'Approved')">✅ Approve</button>
-        <button onclick="updateStatus(${c.id}, 'Rejected')">❌ Reject</button>
-    </div>
-    `;
+        document.getElementById("main").innerHTML = html;
+    });
 
-});
+}
 
-
-// ✅ ADD CLAIM
+// ✅ Add Claim
 function addClaim(){
 
     let title = document.getElementById("title").value;
@@ -158,16 +153,11 @@ function addClaim(){
         body: JSON.stringify({ title, desc })
     })
     .then(res => res.json())
-    .then(() => {
-        showClaims(); // refresh
-    });
+    .then(() => showClaims());
 
 }
 
-</script>
-
-</body>
-</html>
+// ✅ Update Status (FIXED ✅)
 function updateStatus(id, status){
 
     fetch(API + "/updateStatus", {
@@ -175,6 +165,11 @@ function updateStatus(id, status){
         headers:{ "Content-Type":"application/json" },
         body: JSON.stringify({ id, status })
     })
-    .then(()=>showClaims());
+    .then(() => showClaims());
 
 }
+
+</script>
+
+</body>
+</html>
