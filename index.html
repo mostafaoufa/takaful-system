@@ -2,41 +2,28 @@
 <html>
 <head>
     <title>TAKAFUL ERP SYSTEM</title>
-    <style>
-        body{
-            font-family: Arial;
-            text-align:center;
-            margin-top:100px;
-            background:#eee;
-        }
-        input{
-            padding:10px;
-            margin:5px;
-            width:200px;
-        }
-        button{
-            padding:10px 20px;
-            background:#007bff;
-            color:white;
-            border:none;
-            cursor:pointer;
-        }
-    </style>
 </head>
 
-<body>
+<body style="text-align:center; margin-top:100px">
 
 <h2>Login</h2>
 
-<input id="username" placeholder="Username"><br>
-<input id="password" type="password" placeholder="Password"><br>
-<button onclick="login()">Login</button>
+<form id="form">
+
+<input id="username" placeholder="Username"><br><br>
+<input id="password" type="password" placeholder="Password"><br><br>
+
+<button type="submit">Login</button>
+
+</form>
 
 <script>
 
 const API = "https://takaful-backend-rqmn.onrender.com";
 
-function login(){
+document.getElementById("form").addEventListener("submit", function(e){
+
+    e.preventDefault();  // ✅ يمنع reload
 
     let username = document.getElementById("username").value;
     let password = document.getElementById("password").value;
@@ -53,22 +40,23 @@ function login(){
     })
     .then(res => res.json())
     .then(data => {
-        alert(JSON.stringify(data));  // ✅ مهم جدًا نعرف الرد
+
+        alert(JSON.stringify(data));
 
         if(data.ok){
             alert("✅ Login Success");
         }else{
             alert("❌ Login Failed");
         }
+
     })
     .catch(err => {
         alert("❌ ERROR: " + err);
     });
 
-}
+});
 
 </script>
 
 </body>
 </html>
-``
